@@ -1,0 +1,11 @@
+#+TITLE: Python Sudoku solver
+
+* Synopsis
+
+We provide an implementation of [[https://www.ams.org/notices/200904/tx090400460p.pdf][Crook's]] algorithm for solving [[https://en.wikipedia.org/wiki/Sudoku][Sudokus]] in Python.
+
+* Usage
+
+#+BEGIN_SRC shell
+python sudoku_solver.py
+#+END_SRC
