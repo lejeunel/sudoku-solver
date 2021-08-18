@@ -5,6 +5,7 @@ from collections import defaultdict
 import math
 import itertools
 import random
+import time
 
 
 def update_preemptive_sets(preemptive_sets, newp, min_k=2):
@@ -42,7 +43,7 @@ def discard_from_preemptive_sets(coords, values):
     return coords, values, ps
 
 
-def make_choices(preemptive_sets):
+def make_choices_from_preempt(preemptive_sets):
 
     choices = []
     # random shuffle sets
@@ -55,6 +56,19 @@ def make_choices(preemptive_sets):
                 list(zip(x, coords))
                 for x in itertools.permutations(values, len(values))
             ]
+
+    return choices
+
+
+def make_choices_random(board):
+    m = n = int(math.sqrt(len(board)))
+
+    choices = []
+    # random shuffle sets
+    for n in range(2, m + 1):
+        choices_ = [(k, v) for k, v in board.items() if len(v) == n]
+        random.shuffle(choices_)
+        choices += [[(v_, k)] for k, v in choices_ for v_ in v]
 
     return choices
 
@@ -210,7 +224,11 @@ class Solver:
                     continue
                 elif (new_n_done == curr_n_done):
                     # add node in tree
-                    choices = make_choices(preemptive_sets)
+                    if len(preemptive_sets) > 0:
+                        choices = make_choices_from_preempt(preemptive_sets)
+                    else:
+                        choices = make_choices_random(self.board)
+
                     self.tree[len(self.tree) + 1] = {
                         'board': copy.deepcopy(self.board),
                         'choices': choices,
@@ -347,12 +365,16 @@ class Solver:
 
 
 def test(board):
+    print(''.join(40 * ['=']))
     print('input board: ')
     solver = Solver(board)
     print(solver)
+    start = time.time()
     solver.run()
-    print('solution: ')
+    end = time.time()
+    print('found solution in ', end - start, ' seconds')
     print(solver)
+    print(''.join(40 * ['=']))
 
 
 if __name__ == "__main__":
@@ -377,3 +399,25 @@ if __name__ == "__main__":
                      ['.', '1', '.', '.', '9', '.', '.', '.', '5'],
                      ['.', '.', '.', '.', '.', '1', '.', '.', '8']]
     test(preempt_board)
+
+    expert_board = [['.', '.', '.', '.', '3', '.', '.', '.', '.'],
+                    ['8', '.', '.', '.', '.', '9', '.', '5', '7'],
+                    ['.', '.', '.', '.', '.', '.', '.', '.', '3'],
+                    ['.', '.', '.', '9', '.', '.', '.', '.', '.'],
+                    ['.', '6', '3', '1', '.', '.', '4', '2', '.'],
+                    ['.', '2', '.', '.', '7', '.', '.', '.', '.'],
+                    ['.', '.', '.', '.', '1', '8', '.', '.', '.'],
+                    ['.', '5', '.', '.', '.', '.', '8', '.', '.'],
+                    ['2', '.', '4', '.', '.', '.', '.', '9', '6']]
+    test(expert_board)
+
+    hardest_board = [['8', '.', '.', '.', '.', '.', '.', '.', '.'],
+                     ['.', '.', '3', '6', '.', '.', '.', '.', '.'],
+                     ['.', '7', '.', '.', '9', '.', '2', '.', '.'],
+                     ['.', '5', '.', '.', '.', '7', '.', '.', '.'],
+                     ['.', '.', '.', '.', '4', '5', '7', '.', '.'],
+                     ['.', '.', '.', '1', '.', '.', '.', '3', '.'],
+                     ['.', '.', '1', '.', '.', '.', '.', '6', '8'],
+                     ['.', '.', '8', '5', '.', '.', '.', '1', '.'],
+                     ['.', '9', '.', '.', '.', '.', '4', '.', '.']]
+    test(hardest_board)
